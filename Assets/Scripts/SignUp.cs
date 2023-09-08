@@ -1,4 +1,5 @@
 using Firebase.Auth;
+using Firebase.Database;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,13 +11,15 @@ using UnityEngine.UI;
 public class SignUp : MonoBehaviour
 {
     [SerializeField] private Button _registrationButton; 
-    private Coroutine _registrationCoroutine; 
+    private Coroutine _registrationCoroutine;
+    private DatabaseReference mDatabaseRef;
 
     void Reset(){ 
         _registrationButton = GetComponent<Button>(); 
     }       
     void Start(){        
         _registrationButton.onClick.AddListener(HandleRegisterButtonClicked);
+        mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
     }    
     private void HandleRegisterButtonClicked()    {        
         string email = GameObject.Find("InputEmail").GetComponent<TMP_InputField>().text;        
@@ -38,6 +41,9 @@ public class SignUp : MonoBehaviour
             Firebase.Auth.AuthResult result = registerTask.Result;
             Debug.LogFormat("Firebase user created successfully: {0} ({1})",
                 result.User.DisplayName, result.User.UserId);
+
+            string name = GameObject.Find("InputUsername").GetComponent<TMP_InputField>().text;
+            mDatabaseRef.Child("users").Child(result.User.UserId).Child("username").SetValueAsync(name);
         }      
     }
 }
